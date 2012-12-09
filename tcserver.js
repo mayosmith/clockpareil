@@ -9,7 +9,7 @@ added if statement to test if data from twitter is null (deals with preamble)
 todo: setup the twitter stream to stay open between requests from cpcontroller or arduino
 12.1.12 change from streaming to search TODO hookup passphrase from database
 12.4.12 added upp() passphrase change; check for undefined elememt if(data.results[0].id)
-12.9.12 added id to db.save(tweetID.toString()
+12.9.12 added id to db.save(tweetID.toString() 
 */
 
 
