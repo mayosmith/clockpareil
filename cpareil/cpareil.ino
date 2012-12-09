@@ -4,6 +4,7 @@ cpareil
 DESCRIPTION program that drives nonpareil dispenser according to timer and web input
 History: 
 created 11.25.2012
+12.8.12 changed ROTATION
 
 ***************************************/
 
@@ -15,7 +16,7 @@ created 11.25.2012
 #include <WiFiClient.h>
 #include <WiFiServer.h>
 //#define PINTERVAL 10000  //poling interval in ms 
-int ROTATION = 1100; //12 rotation
+int ROTATION = 600; //12 rotation
 
 int ledPin = 5;  // LED connected to digital pin
 int servoPin = 9; //Servo Pin
