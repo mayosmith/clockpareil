@@ -4,6 +4,8 @@ DESCRIPTION: Nodejs program that checks the time, and calls out to other monitor
 History: 
 Created 11.27.12
 11.30.12 calls tccontroller to check tweet status
+12.13.12 changed dispense output from 1 to 5; added calibrate to switch 
+12.16.12 added expStrings external
 */
 
 console.log('create server');
@@ -11,8 +13,10 @@ var util = require('util');
 var url = require('url');
 var http = require('http');
 var cradle = require('cradle');
+var expStr = require('./expStrings');
 var clockFlag = false;
 var tweetFlag = false;
+var calibFlag = false;
 //var cpFlag = false;  // true == dispense candy, false == do nothing
 var lastHour = 99;
 var now = new Date();
@@ -21,10 +25,11 @@ var startTime = 1; //first hour of dispensing UTC (subtract 5 hrs for NYC)
 var endTime = 24; //last hour of dispensing UTC
 
 
-//URL for tcserver callback (change host to tccontroller)
+//URL for tcserver callback
 var options = {
-  host: 'HOSTNAME HERE',
-  path: 'PATH HERE'
+	host: expStr.hostStr,
+	path: expStr.hostPath
+
 };
 
 require('http').createServer(function (request, response) {
@@ -36,7 +41,7 @@ test if it's the top of hour and that it's working hours
 	var now = new Date();
 	var hour = now.getHours();
 	if(hour != lastHour){
-		if (hour>startTime && hour <endTime){
+		if (hour>=startTime && hour <=endTime){
 		clockFlag = true;
 		lastHour = hour;
 		}
@@ -68,13 +73,17 @@ Test if there's a valid Tweet
 //response.writeHead(200, {"Content-Type": "text/plain"});
 output = "#0"
 switch(urlObj.query["gs"]){
-	case "1": //method returns #1 if clock or tweet flag are true
+	case "1": //method returns #5 if clock or tweet flag are true
 	if(clockFlag==true||tweetFlag==true){
-		output = "#1";
+		output = "#5"; //tell arduino to dispense chocolate
 		clockFlag = false;
 		tweetFlag = false;
 		
 	}	
+	if(calibFlag == true){
+		output = "#c";
+		calibFlag = false;
+	}
 	break;
 	
 	case "hour":
@@ -89,7 +98,12 @@ switch(urlObj.query["gs"]){
 	output = "ok";
 	break;
 	
-	case "testmode":
+	case expStr.apiTestStr:
+	calibFlag = true;
+	output = "calibrate..."
+	break;	
+	
+	case expStr.apiTestStr:
 	clockFlag = true;
 	tweetFlag = true;
 	output = "testmode..."
@@ -97,7 +111,6 @@ switch(urlObj.query["gs"]){
 	
 	
 }
-
 
 
   response.end(output);

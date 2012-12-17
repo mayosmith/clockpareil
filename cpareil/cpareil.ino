@@ -5,6 +5,7 @@ DESCRIPTION program that drives nonpareil dispenser according to timer and web i
 History: 
 created 11.25.2012
 12.8.12 changed ROTATION
+12.14.12 set intital ; added calibDispenser(); changed API syntax
 
 ***************************************/
 
@@ -16,7 +17,8 @@ created 11.25.2012
 #include <WiFiClient.h>
 #include <WiFiServer.h>
 //#define PINTERVAL 10000  //poling interval in ms 
-int ROTATION = 600; //12 rotation
+int ROTATION = 600; //1100; //12 rotation
+int CALIBRATE = 50; //calibration amount
 
 int ledPin = 5;  // LED connected to digital pin
 int servoPin = 9; //Servo Pin
@@ -24,19 +26,22 @@ int ledVal = 255;
 int ledStep = 1;
 boolean bufFlag = false;
 String sbuf = "";
+String networkName = "yourNetwork";
+String serverString = "your server";
+String hostString = "Host: + your server";
 
 //**************** WIFI ****************
-char ssid[] = "NETWORK_NAME";     // the name of your network
+char ssid[] = networkName;     // the name of your network
 int status = WL_IDLE_STATUS;     // the Wifi radio's status
 WiFiClient client;
-char server[]="SERVER_NAME";
-//char server[] = "www.google.com";
+char server[]=serverString;
+
 
 
 //**************** Poling ****************
 unsigned long lastConnectionTime = 0;           // last time connected to the server, in milliseconds
 boolean lastConnected = false;                  // state of the connection last time through the main loop
-const unsigned long postingInterval = 15*1000;  // delay between updates, in milliseconds;  // delay between updates, in milliseconds
+const unsigned long postingInterval = 10*1000;  // delay between updates, in milliseconds;  // delay between updates, in milliseconds
 
 
 
@@ -93,13 +98,14 @@ while (client.available()) {
     
     
     if(bufFlag){
-  //   Serial.println("move dispenser ");
-  //   Serial.write(cbuf);
-  //   Serial.println("finish moving dispenser ");
+  //    Serial.println("move dispenser ");
+    //   Serial.write(cbuf);
+      //       Serial.println("finish moving dispenser ");
       
-       if(sbuf=="1") moveDispenser(1); //move the dispenser 
-       if(sbuf=="2") moveDispenser(2); //move the dispenser 
-       if(sbuf=="3") moveDispenser(12); //move the dispenser
+       if(sbuf=="5") moveDispenser(1); //move the dispenser 
+       if(sbuf=="6") moveDispenser(2); //move the dispenser 
+       if(sbuf=="7") moveDispenser(12); //move the dispenser
+       if(sbuf=="c") calibDispenser(1); //nudge dispenser
        bufFlag = false;
        sbuf = "";
     }
@@ -184,7 +190,7 @@ void httpRequest() {
     Serial.println("connecting...");
     // send the HTTP PUT request:
     client.println("GET /?gs=1 HTTP/1.1");
-    client.println("HOST NAME HERE");
+    client.println(hostString);
     client.println("User-Agent: arduino-ethernet");
     client.println("Connection: close");
     client.println();
@@ -213,6 +219,21 @@ void moveDispenser(int steps){
    Serial.println("inside moveDispenser steps --> ");
   myservo.write(89); 
    delay(steps * ROTATION); // 1/12 turn clockwise at 89'
+   myservo.write(90); //stop
+  
+  }
+  
+  /**************************************
+calibDispensor(int steps)
+DESCRIPTION move dispenser clockwise number of steps
+History: 
+created 12.14.2012
+***************************************/
+
+void calibDispenser(int steps){
+   Serial.println("inside moveDispenser steps --> ");
+  myservo.write(89); 
+   delay(steps * CALIBRATE); // small increment
    myservo.write(90); //stop
   
   }
